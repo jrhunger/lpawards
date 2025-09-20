@@ -11,7 +11,10 @@ import sys
 #  min_games: 12    # minimum previous games to be eligible
 #}
   
-def check_bowler_award(award=None, bowler_info=None):
+def console_print(input):
+  print(input)
+
+def check_bowler_award(award=None, bowler_info=None, output=console_print):
   score_value = award.get("score_value", 0)
   avg_ceiling = award.get("avg_ceiling", 301)
   min_games = award.get("min_games", 0)
@@ -26,11 +29,11 @@ def check_bowler_award(award=None, bowler_info=None):
       # series award only if all games are regular
       if stat["status1"] == "R" and stat["status2"] == "R" and stat["status3"] == "R":
         if games >= min_games and award_type == "absolute" and stat["average"] < avg_ceiling and stat["scratchPins"] >= score_value:
-          print(json.dumps({"series": score_value, "bowler": bowler_info["user"]["name"], "week": stat["week"], "series": stat["scratchPins"]}))
+          output(json.dumps({"series": score_value, "bowler": bowler_info["user"]["name"], "week": stat["week"], "series": stat["scratchPins"]}))
         if games >= min_games and award_type == "relative" and stat["average"] < avg_ceiling and stat["scratchPins"] - stat["average"] * 3 >= score_value:
-          print(json.dumps({"series over": score_value, "bowler": bowler_info["user"]["name"], "week": stat["week"], "average": stat["average"], "series": stat["scratchPins"]}))
+          output(json.dumps({"series over": score_value, "bowler": bowler_info["user"]["name"], "week": stat["week"], "average": stat["average"], "series": stat["scratchPins"]}))
         if games >= min_games and award_type == "triplicate" and stat["average"] < avg_ceiling and stat["game1"] == stat["game2"] and stat["game2"] == stat["game3"]:
-          print(json.dumps({"triplicate": stat["game1"], "bowler": bowler_info["user"]["name"], "week": stat["week"]}))
+          output(json.dumps({"triplicate": stat["game1"], "bowler": bowler_info["user"]["name"], "week": stat["week"]}))
       # each individual game counts toward games bowled - TODO - prebowls should count here too
       if stat["status1"] == "R":
         games += 1
@@ -45,12 +48,12 @@ def check_bowler_award(award=None, bowler_info=None):
         if game[1] != "R":
           continue
         if games >= min_games and award_type == "absolute" and stat["average"] < avg_ceiling and game[0] >= score_value:
-          print(json.dumps({"award": award["name"], "bowler": bowler_info["user"]["name"], "week": stat["week"], "average": stat["average"], "game": game[0]}))
+          output(json.dumps({"award": award["name"], "bowler": bowler_info["user"]["name"], "week": stat["week"], "average": stat["average"], "game": game[0]}))
         if games >= min_games and award_type == "relative" and stat["average"] < avg_ceiling and game[0] - stat["average"] >= score_value:
-          print(json.dumps({"award": award["name"], "bowler": bowler_info["user"]["name"], "week": stat["week"], "average": stat["average"], "game": game[0]}))
+          output(json.dumps({"award": award["name"], "bowler": bowler_info["user"]["name"], "week": stat["week"], "average": stat["average"], "game": game[0]}))
         games += 1
 
-def check_bowler_awards(binfo=None):
+def check_bowler_awards(binfo=None, output=console_print):
   check_bowler_award(award = {
     "name": "50 over game < 140",
     "type": "relative",
@@ -58,27 +61,27 @@ def check_bowler_awards(binfo=None):
     "min_games": 12,
     "unit": "game",
     "score_value": 50 
-  }, bowler_info=binfo)
+  }, bowler_info=binfo, output=output)
   check_bowler_award(award = {
     "name": "75 over game",
     "type": "relative",
     "min_games": 12,
     "unit": "game",
     "score_value": 75 
-  }, bowler_info=binfo)
+  }, bowler_info=binfo, output=output)
   check_bowler_award(award = {
     "name": "100 over game",
     "type": "relative",
     "min_games": 12,
     "unit": "game",
     "score_value": 100 
-  }, bowler_info=binfo)
+  }, bowler_info=binfo, output=output)
   check_bowler_award(award = {
     "name": "triplicate (igbo)",
     "type": "triplicate",
     "unit": "series",
     "min_games": 0,
-  }, bowler_info=binfo)
+  }, bowler_info=binfo, output=output)
 
 def check_bowler_awards_old(binfo=None):
   game50 = []

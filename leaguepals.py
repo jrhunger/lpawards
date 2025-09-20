@@ -1,14 +1,24 @@
 #!/usr/bin/python3
 import requests
 import sys
+from datetime import datetime
 
 session = None
+
+def console_print(input):
+  print(input)
 
 def checkresponse(r):
   if r.status_code != 200:
     print("==> status = " + str(r.status_code))
     print(r.headers)
     sys.exit(1)
+
+def logged_in():
+    if session:
+        return True
+    else:
+        return False
 
 def login(username="", password=""):
     if not username or not password:
@@ -59,7 +69,7 @@ def get_my_leagues():
 # augmented with a new key "bowlers", the value of which is an array of all
 # bowlers in the league. The bowler objects are the upstream LeaguePals json
 # augmented with a "team" key, the value of which is the team id
-def get_league_info(league_id = None, center_id = None):
+def get_league_info(league_id = None, center_id = None, output=console_print, maxteams=999):
     global session
     if not session:
         print("attempt to get league info without session")
@@ -67,27 +77,30 @@ def get_league_info(league_id = None, center_id = None):
     r = session.get('https://www.leaguepals.com/fullLeagueInfoBowler?id=' + league_id)
     checkresponse(r)
     league_info = r.json()["data"]
-    team_limit = 50
     team_count = 0
+    max_game_date = ""
     league_info["bowlers"] = []
     for team in league_info["teams"]:
-        print(team["_id"] + "	" + team["name"])
+        output(team["name"])
         r = session.get('https://www.leaguepals.com/loadIndividualTeam?id=' + team["_id"] + '&noPre=false')
         checkresponse(r)
         #print(r.text)
         teaminfo = r.json()
         for bowler in teaminfo["data"]:
-            print("	" + bowler["_id"] + "	" + bowler["name"])
+            output("  " + bowler["name"])
             r2 = session.get('https://www.leaguepals.com/my-leagues-stats' + 
                     '?center=' + center_id +
                     '&league=' + league_id +
                     '&userid=' + bowler["_id"])
             checkresponse(r2)
-            #print(r2.text)
             bowlerinfo = r2.json()
             bowlerinfo["data"]["team"] = { "id": team["_id"], "name": team["name"]}
             league_info["bowlers"].append(bowlerinfo["data"])
+            if bowlerinfo["data"]["stats"][-1]["date"] > max_game_date:
+                max_game_date = bowlerinfo["data"]["stats"][-1]["date"]
         team_count += 1
-        if team_count >= team_limit:
-            return league_info
+        if team_count >= maxteams:
+            break
+    league_info["last_bowled"] = max_game_date
+    league_info["retrieved"] = datetime.now().strftime("%Y-%m-%d.%H:%M:%S")
     return league_info
