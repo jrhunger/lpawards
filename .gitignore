@@ -1,0 +1,6 @@
+auth.json
+__pycache__/
+cache/
+*.spec
+build/
+venv/
