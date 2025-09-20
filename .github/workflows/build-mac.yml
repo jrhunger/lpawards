@@ -3,7 +3,7 @@ run-name: ${{ github.actor }} building mac executable
 on: [push]
 jobs:
   pyinstaller-build:
-    runs-on: mac-latest
+    runs-on: macos-latest
     steps:
       - name: Create Executable
         uses: sayyid5416/pyinstaller@v1
