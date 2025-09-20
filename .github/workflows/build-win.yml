@@ -12,4 +12,4 @@ jobs:
           spec: 'lpawards.py'
           requirements: 'requirements.txt'
           upload_exe_with_name: 'lpawards.exe'
-          options: --onefile, --name "lpawards", --windowed, 
+          options: --onefile, --name "lpawards", 
