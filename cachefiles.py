@@ -8,9 +8,13 @@ import re
 # constant for now, maybe changeable later
 cachepath = "cache/"
 
-def init():
+def console_print(input):
+  print(input)
+
+def init(output=console_print):
     if not os.path.isdir(cachepath):
        os.makedirs(cachepath) 
+       output("-- created cache directory " + cachepath + " --")
 
 def get_auth_info():
     if os.path.isfile(cachepath + 'auth.json'):
@@ -23,15 +27,16 @@ def get_auth_info():
         "password": "def"
     }
 
-def save_auth_info(username, password):
+def save_auth_info(username, password, output=console_print):
     auth = {
         "username": username,
         "password": password
     }
+    init()
     auth_str = json.dumps(auth, indent=4)
     with open(cachepath + "auth.json", "w") as auth_json:
         auth_json.write(auth_str)
-
+    output("-- cached auth info in " + cachepath + "auth.json --")
 
 def get_league_info(league_id=None):
     if not league_id:
@@ -44,11 +49,13 @@ def get_league_info(league_id=None):
             return league_info
     return None
 
-def save_league_info(league_info):
+def save_league_info(league_info, output=console_print):
     league_id = league_info["_id"]
     league_str = json.dumps(league_info, indent=4)
+    init()
     with open(cachepath + league_id + ".json", "w") as league_json:
         league_json.write(league_str)
+    output("-- cached league data in " + cachepath + " --")
 
 # returns an array of any cached leagues in this format:
 #  {
