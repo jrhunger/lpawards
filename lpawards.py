@@ -134,7 +134,9 @@ def do_calculate():
   global league_info
   output_textarea("-- calculating awards --")
   for bowler_info in league_info["bowlers"]:
-    awards.check_bowler_awards(bowler_info, output=output_textarea)
+    awards.check_bowler_awards(bowler_info, org="USBC", output=output_textarea)
+  for bowler_info in league_info["bowlers"]:
+    awards.check_bowler_awards(bowler_info, org="IGBO", output=output_textarea)
 
 def no_input(event):
   # only allows copying text from window, no input
